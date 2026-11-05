@@ -1,0 +1,16 @@
+# macOS
+.DS_Store
+
+# Build output
+dist/
+web-ext-artifacts/
+*.zip
+*.xpi
+
+# Dependencies (if tooling is added later)
+node_modules/
+
+# Editor
+.vscode/
+.idea/
+*.swp

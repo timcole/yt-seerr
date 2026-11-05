@@ -1,0 +1,19 @@
+{
+  "name": "yt-seerr",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Firefox extension that adds a \"Request in Seerr\" button to movie trailers on YouTube.",
+  "license": "MIT",
+  "author": "Timothy Cole",
+  "scripts": {
+    "start": "web-ext run",
+    "build": "web-ext build --artifacts-dir dist --overwrite-dest --ignore-files package.json package-lock.json README.md LICENSE",
+    "lint": "web-ext lint --ignore-files package.json package-lock.json",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "devDependencies": {
+    "prettier": "^3.9.10",
+    "web-ext": "^10.8.0"
+  }
+}
