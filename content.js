@@ -102,15 +102,21 @@ function parseTrailerTitle(rawTitle, channelName) {
   title = title.replace(/\([^)]*\)|\[[^\]]*\]|【[^】]*】/g, ' ');
 
   // Split on strong separators. Hyphens only count when spaced, so
-  // "Spider-Man" survives but "Movie - Official Trailer" splits.
-  const segments = title.split(/\s*[|•–—~]\s*|\s+-\s+|\s*\/\/\s*/);
+  // "Spider-Man" survives but "Movie - Official Trailer" splits. The trailer
+  // phrase is a separator too: in "ETERNAL RETURN Trailer (2026) Naomi Scott"
+  // what follows it is cast, not title. `cut` marks those trailing pieces.
+  const segments = [];
+  for (const part of title.split(/\s*[|•–—~]\s*|\s+-\s+|\s*\/\/\s*/)) {
+    part
+      .split(TRAILER_PHRASE_RE)
+      .forEach((text, i) => segments.push({ text, cut: i > 0 }));
+  }
 
   const channel = norm(channelName);
   const segs = [];
 
-  for (let seg of segments) {
-    seg = seg
-      .replace(TRAILER_PHRASE_RE, ' ')
+  for (const { text, cut } of segments) {
+    const seg = text
       .replace(TAIL_RE, ' ')
       .replace(/\b(?:season|series)\s+\d+\b/gi, ' ')
       .replace(/\bs\d{1,2}\b/gi, ' ')
@@ -129,7 +135,7 @@ function parseTrailerTitle(rawTitle, channelName) {
     const n = norm(seg);
     if (!n || n.length < 2) continue;
     if (STUDIOS.has(n) || (channel && n === channel)) continue;
-    segs.push(seg);
+    segs.push({ text: seg, cut });
   }
   if (!segs.length) return null;
 
@@ -142,15 +148,22 @@ function parseTrailerTitle(rawTitle, channelName) {
       return;
     candidates.push({ q, w });
   };
-  add(segs[0], 1);
-  // "Mission: Impossible – The Final Reckoning" splits on the dash.
-  if (segs.length > 1) add(`${segs[0]} ${segs[1]}`, 1);
-  for (const s of segs.slice(1)) add(s, 0.9);
-  for (const s of segs) {
-    if (s.includes(':')) for (const part of s.split(':')) add(part, 0.85);
+  add(segs[0].text, 1);
+  // "Mission: Impossible – The Final Reckoning" splits on the dash, but don't
+  // glue the title to whatever followed the word "Trailer".
+  if (segs.length > 1 && !segs[1].cut)
+    add(`${segs[0].text} ${segs[1].text}`, 1);
+  for (const s of segs.slice(1)) add(s.text, s.cut ? 0.75 : 0.9);
+  for (const { text } of segs) {
+    if (text.includes(':')) for (const part of text.split(':')) add(part, 0.85);
   }
 
-  return { candidates: candidates.slice(0, 5), query: segs[0], year, tvHint };
+  return {
+    candidates: candidates.slice(0, 5),
+    query: segs[0].text,
+    year,
+    tvHint,
+  };
 }
 
 /* ------------------------------------------------------------------ *
