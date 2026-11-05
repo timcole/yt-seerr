@@ -1,5 +1,8 @@
 'use strict';
 
+// Chrome only exposes the promise-based APIs as `chrome`.
+globalThis.browser ??= chrome;
+
 const DEFAULTS = {
   url: '',
   apiKey: '',
@@ -126,7 +129,7 @@ async function details(mediaType, mediaId) {
   return api(`/${mediaType}/${mediaId}`);
 }
 
-browser.runtime.onMessage.addListener(async (msg) => {
+async function handle(msg) {
   try {
     switch (msg.type) {
       case 'config': {
@@ -150,9 +153,16 @@ browser.runtime.onMessage.addListener(async (msg) => {
   } catch (e) {
     return { ok: false, error: e.message || String(e) };
   }
+}
+
+// Chrome ignores a promise returned from the listener, so reply through
+// sendResponse and return true to keep the channel open.
+browser.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+  handle(msg).then(sendResponse);
+  return true;
 });
 
-browser.browserAction.onClicked.addListener(() => {
+browser.action.onClicked.addListener(() => {
   browser.runtime.openOptionsPage();
 });
 

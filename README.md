@@ -1,6 +1,6 @@
 # YouTube → Seerr
 
-A Firefox extension that adds a **Request in Seerr** button to movie and TV
+A Firefox and Chrome extension that adds a **Request in Seerr** button to movie and TV
 trailers on YouTube.
 
 When you open a trailer, the extension parses the video title, searches your
@@ -25,16 +25,7 @@ result or run a manual search.
 npm install
 ```
 
-### Temporary (development)
-
-```sh
-npm start
-```
-
-Or open `about:debugging#/runtime/this-firefox`, click **Load Temporary
-Add-on…**, and select `manifest.json`.
-
-### Packaged
+The same Manifest V3 build runs in both browsers.
 
 ```sh
 npm run build
@@ -44,19 +35,35 @@ npm run build
 CI also builds the zip on every push to `main` and attaches it to the run as an
 artifact.
 
-Install the zip from `about:addons` → ⚙ → **Install Add-on From File…**.
-Release builds of Firefox require the add-on to be signed through
-[AMO](https://addons.mozilla.org/developers/) (self-distributed/unlisted is fine).
+### Firefox
+
+For development, run `npm start`, or open
+`about:debugging#/runtime/this-firefox`, click **Load Temporary Add-on…**, and
+select `manifest.json`.
+
+For a permanent install, install the zip from `about:addons` → ⚙ → **Install
+Add-on From File…**. Release builds of Firefox require the add-on to be signed
+through [AMO](https://addons.mozilla.org/developers/) (self-distributed/unlisted
+is fine).
 
 Requires Firefox 142 or later.
+
+### Chrome
+
+Open `chrome://extensions`, turn on **Developer mode**, click **Load
+unpacked**, and select this folder (or the unzipped build). `npm run
+start:chrome` launches a Chromium profile with it loaded.
+
+Chrome will show a warning that `background.scripts` is ignored. That's
+expected: Firefox uses `scripts`, and Chrome uses `service_worker`.
 
 ## Configure
 
 The settings page opens on first install. After that, click the toolbar icon
 (or open the extension's preferences). Set:
 
-- **Seerr URL**: your instance, e.g. `https://seerr.example.com`. Firefox will
-  prompt for permission to access the host when you save.
+- **Seerr URL**: your instance, e.g. `https://seerr.example.com`. The browser
+  will prompt for permission to access the host when you save.
 - **API key** _(optional)_: from Seerr → Settings → General. If left blank, the
   extension uses your existing browser login session.
 - **Username** _(optional, requires an API key)_: requests made with the API

@@ -1,5 +1,8 @@
 'use strict';
 
+// Chrome only exposes the promise-based APIs as `chrome`.
+globalThis.browser ??= chrome;
+
 /* ------------------------------------------------------------------ *
  * Title parsing
  * ------------------------------------------------------------------ */

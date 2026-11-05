@@ -1,5 +1,8 @@
 'use strict';
 
+// Chrome only exposes the promise-based APIs as `chrome`.
+globalThis.browser ??= chrome;
+
 const DEFAULTS = { url: '', apiKey: '', username: '' };
 const $ = (id) => document.getElementById(id);
 
